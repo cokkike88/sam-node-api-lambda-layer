@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  pidelorapido-api-v2
+
+Transform:
+- AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        STAGE: prod
+
+Parameters:
+  env:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+Resources:
+  
+  onlyLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambda"
+      Handler: src/lambdas/only-lambda.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET  
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

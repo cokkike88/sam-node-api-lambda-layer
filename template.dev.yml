@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  sam-node-api-lambda-layer
+
+Transform:
+- AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        STAGE: dev
+
+Parameters:
+  env:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+  createResources:
+    Type: String
+    Default: n
+    AllowedValues:
+      - n
+
+Conditions:
+  CreateResources: !Equals [ !Ref createResources, yes]
+
+Resources:
+  
+  onlyLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambda"
+      Handler: src/example/only-lambda.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Layers:
+        - !Ref CommonResourcesLayer
+      Events:
+        Api:          
+          Type: Api
+          Condition: CreateResources
+          Properties:
+            Path: /{user}
+            Method: GET
+  
+  onlyLambdaPost:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambdaPost"
+      Handler: src/example/only-lambda-post.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Layers:
+        - !Ref CommonResourcesLayer
+      Events:
+        Api:          
+          Type: Api
+          Condition: CreateResources
+          Properties:
+            Path: /
+            Method: POST
+
+
+  CommonResourcesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+        LayerName: sam-node-api-layer
+        Description: Dependencies for sam app [temp-units-conv]
+        ContentUri: src/common-resources-layer/
+        CompatibleRuntimes:
+          - nodejs12.x      
+
+Outputs:
+  WebEndpoint:
+    Condition: CreateResources
+    Description: "API Gateway endpoint URL for stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
