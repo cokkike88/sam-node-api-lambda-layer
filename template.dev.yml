@@ -42,9 +42,9 @@ Resources:
 
   onlyLambda:
     Type: AWS::Serverless::Function
+    # Condition: CreateResources
     Properties:
-      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambda"
-      Condition: CreateResources
+      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambda"      
       Handler: src/example/only-lambda.handler
       Runtime: nodejs12.x
       MemorySize: 128
