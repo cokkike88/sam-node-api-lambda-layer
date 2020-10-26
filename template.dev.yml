@@ -7,6 +7,8 @@ Transform:
 
 Globals:
   Function:
+    Layers:
+      - !Ref CommonResourcesLayer
     Environment:
       Variables:
         STAGE: dev
@@ -20,52 +22,15 @@ Parameters:
       - prod
   createResources:
     Type: String
-    Default: n
+    Default: noResources
     AllowedValues:
-      - n
+      - noResources
 
 Conditions:
-  CreateResources: !Equals [ !Ref createResources, yes]
+  CreateResources: !Equals [ !Ref createResources, yesResources]
 
 Resources:
   
-  onlyLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambda"
-      Handler: src/example/only-lambda.handler
-      Runtime: nodejs12.x
-      MemorySize: 128
-      Timeout: 100
-      Layers:
-        - !Ref CommonResourcesLayer
-      Events:
-        Api:          
-          Type: Api
-          Condition: CreateResources
-          Properties:
-            Path: /{user}
-            Method: GET
-  
-  onlyLambdaPost:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambdaPost"
-      Handler: src/example/only-lambda-post.handler
-      Runtime: nodejs12.x
-      MemorySize: 128
-      Timeout: 100
-      Layers:
-        - !Ref CommonResourcesLayer
-      Events:
-        Api:          
-          Type: Api
-          Condition: CreateResources
-          Properties:
-            Path: /
-            Method: POST
-
-
   CommonResourcesLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -73,7 +38,47 @@ Resources:
         Description: Dependencies for sam app [temp-units-conv]
         ContentUri: src/common-resources-layer/
         CompatibleRuntimes:
-          - nodejs12.x      
+          - nodejs12.x    
+
+  onlyLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambda"
+      Condition: CreateResources
+      Handler: src/example/only-lambda.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Tags:
+        Name: !Sub "${env}-${AWS::StackName}-onlyLambda"
+        Env: !Sub "${env}"
+      # Layers:
+      #   - !Ref CommonResourcesLayer
+      Events:
+        Api:          
+          Type: Api
+          Properties:
+            Path: /{user}
+            Method: GET
+  
+  onlyLambdaPost:
+    Type: AWS::Serverless::Function
+    Condition: CreateResources
+    Properties:
+      FunctionName: !Sub "${env}-${AWS::StackName}-onlyLambdaPost"
+      Handler: src/example/only-lambda-post.handler
+      Runtime: nodejs12.x
+      MemorySize: 128
+      Timeout: 100
+      Tags:
+        Name: !Sub !Sub "${env}-${AWS::StackName}-onlyLambdaPost"
+        Env: !Sub "${env}"
+      Events:
+        Api:          
+          Type: Api          
+          Properties:
+            Path: /
+            Method: POST    
 
 Outputs:
   WebEndpoint:

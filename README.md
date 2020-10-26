@@ -1,4 +1,128 @@
-# api2
+# Backend-Template
+
+## Install AWS Sam
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-linux.html
+
+## Init project
+sam init
+- To Use the template -> select the option 2 and enter
+- Insert this url
+git@bitbucket.org:PideloRapidoTeam/microservice-aws-sam-template.git
+
+## Build
+- To build all funcitons run the next command
+sam build -t <template>
+
+- To build a function
+sam build -t <template> <functionName>
+
+## Validate template [yml|yaml]
+sam validate
+sam validate -t <path [yml|yaml]>
+
+## Invoke local function
+sam local invoke <function name in yml file>
+- To invoke functions with event parameters
+sam local invoke -n env.json -e events/event-get-all-items.json getAllItemsFunction
+
+## Invoke local api
+- Up api local
+sam local start-api
+
+- Up api in debug mode
+sam local start-api -p 3008 -d 5858
+-p port to up the api in docker
+-d port to debug the api this port has to be the same that the .vscode/launch.json file
+
+## Test
+- Run in cosole
+npx jest
+- Run single test
+npx jest  get-all-items.test.ts
+
+## Debbug mode console
+sam local invoke --debug-port 5858 <function name in yml file>
+
+## Deploy 
+sam deploy -g
+
+## Enviroment
+- AWS_REGION is default defined so you cat use it with next code process.env.AWS_REGION in wherever place of your code.
+
+## Error handler
+- default response when appear some error
+{
+  "errorType": "ReferenceError",
+  "errorMessage": "x is not defined",
+  "trace": [
+    "ReferenceError: x is not defined",
+    "    at Runtime.exports.handler (/var/task/index.js:2:3)",
+    "    at Runtime.handleOnce (/var/runtime/Runtime.js:63:25)",
+    "    at process._tickCallback (internal/process/next_tick.js:68:7)"
+  ]
+}
+
+- Whether you custom the error message can use the next code throw new Error(`Se encontro un error`);
+{
+  "errorType": "Error",
+  "errorMessage": "Se encontro un error",
+  "trace": [
+    "Error: Se encontro un error",
+    "    at Runtime.exports.handler (/var/task/src/lambdas/only-lambda.js:5:13)",
+    "    at Runtime.handleOnce (/var/runtime/Runtime.js:66:25)"
+  ]
+}
+
+- Whether you custom the error you have to use the next structure, in the body you can put any structure. 
+- This statement is when you use the api like output, if you don't use api like output the output structure can be any.
+{
+  statusCode: 500,
+  body: `se encontro un error al consultar el usuario ${error}`
+};
+
+## Response
+- You have tu use this structure, body can be any structure
+{
+  statusCode: 200,
+  headers: { "x-custom-header" : "my custom header value" },
+  body: 'Lambda se ejecuto con exito'
+};
+
+- Whether don't use api you can use any output structure
+
+# ========= DOCUMENTATION ============
+
+# lambda function definition
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-function.html#cfn-lambda-function-functionname
+
+# deploy a lambda function aws sam
+https://docs.aws.amazon.com/codedeploy/latest/userguide/tutorial-lambda-sam.html
+
+# sam build documentation
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-build.html
+
+# sam local invoke documentation
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-invoke.html
+
+# sam deploy documentation
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html
+https://docs.aws.amazon.com/codedeploy/latest/userguide/tutorial-lambda-sam-deploy.html
+
+# sam template global configuration (for all lambda functions)
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+
+# layer version to shared libraries or runtime code by a lambda function
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-layerversion.html
+
+# lambda version
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-version.html#aws-resource-lambda-version--examples
+
+# pipeline workshop
+https://cicd.serverlessworkshops.io/javascript/buildpipe/cdkinit.html
+
+
+
+# ORIGINAL DOCUMENTATION
 
 This project contains source code and supporting files for a serverless application that you can deploy with the AWS Serverless Application Model (AWS SAM) command line interface (CLI). It includes the following files and folders:
 
